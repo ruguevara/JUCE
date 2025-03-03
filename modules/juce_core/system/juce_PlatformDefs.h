@@ -146,7 +146,7 @@ namespace juce
 
 //==============================================================================
 #if (JUCE_DEBUG && ! JUCE_DISABLE_ASSERTIONS) || DOXYGEN
-  /** Writes a string to the standard error stream.
+  /** Writes a string to the standard error stream, including the filename and line number.
       Note that as well as a single string, you can use this to write multiple items
       as a stream, e.g.
       @code
@@ -156,8 +156,7 @@ namespace juce
       that have important side-effects!
       @see Logger::outputDebugString
   */
-  #define DBG(textToWrite)              JUCE_BLOCK_WITH_FORCED_SEMICOLON (juce::String tempDbgBuf; tempDbgBuf << textToWrite; juce::Logger::outputDebugString (tempDbgBuf);)
-
+  #define DBG(textToWrite)              JUCE_BLOCK_WITH_FORCED_SEMICOLON (juce::String tempDbgBuf; const char* filename = strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : (strrchr(__FILE__, '\\') ? strrchr(__FILE__, '\\') + 1 : __FILE__); tempDbgBuf << filename << ":" << __LINE__ << " - " << textToWrite; juce::Logger::outputDebugString (tempDbgBuf);)
   //==============================================================================
   /** This will always cause an assertion failure.
       It is only compiled in a debug build, (unless JUCE_LOG_ASSERTIONS is enabled for your build).

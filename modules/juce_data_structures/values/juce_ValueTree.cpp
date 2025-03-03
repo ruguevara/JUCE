@@ -110,7 +110,12 @@ public:
     void sendChildAddedMessage (ValueTree child)
     {
         ValueTree tree (*this);
-        callListenersForAllParents (nullptr, [&] (Listener& l) { l.valueTreeChildAdded (tree, child); });
+        // DBG("SharedObject::sendChildAddedMessage of " << child.getType().toString() << " to " << type.toString());
+        callListenersForAllParents (nullptr, [&] (Listener& l) {
+            // get listener
+            // DBG("SharedObject::callListenersForAllParents of " << child.getType().toString() << " to " << type.toString());
+            l.valueTreeChildAdded (tree, child);
+        });
     }
 
     void sendChildRemovedMessage (ValueTree child, int index)
@@ -253,6 +258,7 @@ public:
 
     void addChild (SharedObject* child, int index, UndoManager* undoManager)
     {
+        // DBG("SharedObject::addChild " << child->type.toString() << " to " << type.toString());
         if (child != nullptr && child->parent != this)
         {
             if (child != this && ! isAChildOf (child))
@@ -272,6 +278,7 @@ public:
                 {
                     children.insert (index, child);
                     child->parent = this;
+                    // DBG("SharedObject::addChild sendChildAddedMessage of " << child->type.toString() << " to " << type.toString());
                     sendChildAddedMessage (ValueTree (*child));
                     child->sendParentChangeMessage();
                 }
@@ -279,7 +286,7 @@ public:
                 {
                     if (! isPositiveAndBelow (index, children.size()))
                         index = children.size();
-
+                    // DBG("SharedObject::addChild AddOrRemoveChildAction of " << child->type.toString() << " to " << type.toString());
                     undoManager->perform (new AddOrRemoveChildAction (*this, index, child));
                 }
             }
@@ -494,8 +501,10 @@ public:
         {
             if (isDeleting)
                 target->removeChild (childIndex, nullptr);
-            else
+            else {
+                // DBG("AddOrRemoveChildAction::perform Adding child " << child->type.toString() << " to " << target->type.toString());
                 target->addChild (child.get(), childIndex, nullptr);
+            }
 
             return true;
         }
@@ -923,7 +932,7 @@ int ValueTree::indexOf (const ValueTree& child) const noexcept
 void ValueTree::addChild (const ValueTree& child, int index, UndoManager* undoManager)
 {
     jassert (object != nullptr); // Trying to add a child to a null ValueTree!
-
+    // DBG("ValueTree::addChild " << child.getType().toString() << " to " << object->type.toString());
     if (object != nullptr)
         object->addChild (child.object.get(), index, undoManager);
 }
